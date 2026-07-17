@@ -1,0 +1,189 @@
+[
+  {
+    "id": -1,
+    "data_user": {
+      "name": "",
+      "lastName": "",
+      "address": {
+        "country": "",
+        "city": "",
+        "street": "",
+        "civicNum": ""
+      },
+      "prePhone": "",
+      "phone": "",
+      "email": "",
+      "pw": ""
+    }
+  },
+  {
+    "id": 0,
+    "data_user": {
+      "name": "Mattiagiorgio",
+      "lastName": "Covato",
+      "address": {
+        "country": "Italia",
+        "city": "Modica",
+        "street": "Via A, Cappellini",
+        "civicNum": "68"
+      },
+      "prePhone": "+39",
+      "phone": "3270474233",
+      "email": "mattiagiorgiocovato14@gmail.com",
+      "pw": "bula"
+    }
+  },
+  {
+    "id": 1,
+    "data_user": {
+      "name": "Marcello",
+      "lastName": "Panevino",
+      "address": {
+        "country": "Italia",
+        "city": "Ragusa",
+        "street": "Via Roma",
+        "civicNum": "5"
+      },
+      "prePhone": "+39",
+      "phone": "000252285",
+      "email": "poanevino@marc.it",
+      "pw": "01234"
+    }
+  },
+  {
+    "id": 2,
+    "data_user": {
+      "name": "Sfigata",
+      "lastName": "Di Merdo",
+      "address": {
+        "country": "Italia",
+        "city": "Modica",
+        "street": "Via A. Cappellini",
+        "civicNum": "68"
+      },
+      "prePhone": "+39",
+      "phone": "3270474233",
+      "email": "meglio@morire.it",
+      "pw": "morteame"
+    }
+  },
+  {
+    "id": 3,
+    "data_user": {
+      "name": "Carla",
+      "lastName": "Puleddu",
+      "address": {
+        "country": "Italia",
+        "city": "Cagliari",
+        "street": "Via fumeddu",
+        "civicNum": "56"
+      },
+      "prePhone": "+39",
+      "phone": "000333000555",
+      "email": "fumeddu@aucieddu.it",
+      "pw": "tumeddu"
+    }
+  },
+  {
+    "id": 4,
+    "data_user": {
+      "name": "Carlo",
+      "lastName": "Beddu",
+      "address": {
+        "country": "Italia",
+        "city": "Ragusa",
+        "street": "Via Aceddu",
+        "civicNum": "69"
+      },
+      "prePhone": "+39",
+      "phone": "0234567894",
+      "email": "aceddu@befeddu.it",
+      "pw": "figghiabefigghi"
+    }
+  },
+  {
+    "id": 5,
+    "data_user": {
+      "name": "Ciofanni",
+      "lastName": "Krasten",
+      "address": {
+        "country": "Italia",
+        "city": "Torino",
+        "street": "Via Tronzano",
+        "civicNum": "1"
+      },
+      "prePhone": "+39",
+      "phone": "32226777896",
+      "email": "ciofanni@krasten.com",
+      "pw": "ciofeken"
+    }
+  },
+  {
+    "id": 6,
+    "data_user": {
+      "name": "Damiano",
+      "lastName": "No Lano",
+      "address": {
+        "country": "Italia",
+        "city": "Vezzano Ligure",
+        "street": "Via L. Einaudi",
+        "civicNum": "-5"
+      },
+      "prePhone": "+39",
+      "phone": "0123456789",
+      "email": "no@lano.it",
+      "pw": "noretto"
+    }
+  },
+  {
+    "id": 7,
+    "data_user": {
+      "name": "Xavier",
+      "lastName": "Polpetto",
+      "address": {
+        "country": "R",
+        "city": "R",
+        "street": "R",
+        "civicNum": "4"
+      },
+      "prePhone": "4",
+      "phone": "4",
+      "email": "polpetto@sughetto.it",
+      "pw": "15"
+    }
+  },
+  {
+    "id": 8,
+    "data_user": {
+      "name": "Budino",
+      "lastName": "poppoto",
+      "address": {
+        "country": "Italia",
+        "city": "Roma",
+        "street": "Via poppota",
+        "civicNum": "45"
+      },
+      "prePhone": "+39",
+      "phone": "6456",
+      "email": "pop@pezze.it",
+      "pw": "666666"
+    }
+  },
+  {
+    "id": 9,
+    "data_user": {
+      "name": "Pullo",
+      "lastName": "Pallo",
+      "address": {
+        "country": "Italia",
+        "city": "Venezia",
+        "street": "Via Apollo",
+        "civicNum": "890"
+      },
+      "prePhone": "+39",
+      "phone": "315",
+      "email": "pullo@pallo.it",
+      "pw": "pallopullo"
+    }
+  }
+]
