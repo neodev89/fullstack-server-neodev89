@@ -1,12 +1,14 @@
 # il file contenente le routes API
 from fastapi import APIRouter, Body, Response, status, HTTPException
-from app.models import User
-from app.models import ResponseAPI, ResponseUserAPI, User
+from app.models import ResponseAPI, ResponseUserAPI, ReqUser, ResUser
 from app.storage import read_db, write_db
+from app.invoices import Invoice
 
 routes = APIRouter()
 
-@routes.get("/get-user/{email}", response_model=ResponseAPI[ResponseUserAPI[User | None]], 
+@routes.get(
+    "/get-user/{email}",
+    response_model=ResponseAPI[ResponseUserAPI[ResUser | None]],
     responses={
         404: {
             "description": "Nessun utente trovato",
@@ -17,46 +19,43 @@ routes = APIRouter()
                         "success": False,
                         "message": "Nessun utente trovato",
                         "data": None,
-                        "status": 404
-                    }
+                        "status": 404,
+                    },
                 }
-            }
+            },
         }
-    }            
+    },
 )
 def get_user(email: str):
     db = read_db()
-    
+
     # Cerca l'utente tramite l'id
     for u in db:
         if u["data_user"] is None:
             continue
-        
+
         if u["data_user"]["email"] == email:
-            return ResponseAPI[ResponseUserAPI[User | None]](
+            return ResponseAPI[ResponseUserAPI[ResUser | None]](
                 success=True,
                 message="L'utente è stato trovato",
-                data=ResponseUserAPI[User | None](
-                    id=u["id"],
-                    data_user=u["data_user"]
+                data=ResponseUserAPI[ResUser | None](
+                    id=u["id"], data_user=u["data_user"]
                 ),
                 status=200,
             )
-            
-    # Nessun utente trovato    
-    return ResponseAPI[ResponseUserAPI[User | None]](
+
+    # Nessun utente trovato
+    return ResponseAPI[ResponseUserAPI[ResUser | None]](
         success=True,
         message="Valori ritornati",
-        data=ResponseUserAPI[None](
-            id=u["id"],
-            data_user=None
-        ),
-        status=404
+        data=ResponseUserAPI[None](id=u["id"], data_user=None),
+        status=404,
     )
+
 
 @routes.post(
     "/save-user",
-    response_model=ResponseAPI[ResponseUserAPI[User | None]],
+    response_model=ResponseAPI[ResponseUserAPI[ResUser | None]],
     responses={
         409: {
             "description": "Email già registrata",
@@ -67,14 +66,14 @@ def get_user(email: str):
                         "success": False,
                         "message": "Email già registrata",
                         "data": None,
-                        "status": 409
-                    }
+                        "status": 409,
+                    },
                 }
-            }
+            },
         }
-    }
+    },
 )
-def post_user(user: User, response: Response):
+def post_user(user: ReqUser, response: Response):
 
     db = read_db()
 
@@ -82,47 +81,94 @@ def post_user(user: User, response: Response):
     for u_d in db:
         if u_d["data_user"] is None:
             continue
-        
+
         if u_d["data_user"]["email"] == user.email:
-            raise HTTPException(
-                status_code=409,
-                detail="Email già registrata"
-            )
             return ResponseAPI[ResponseUserAPI[None]](
                 success=False,
                 message="Utente già presente nel database",
-                data=ResponseUserAPI[None](
-                    id=-1,
-                    data_user=None    
-                ),
-                status=409
+                data=ResponseUserAPI[None](id=-1, data_user=None),
+                status=409,
             )
-            
+
     # Genera un nuovo ID
-    new_id = (max([u["id"] for u in db]) + 1)
-    
+    new_id = max([u["id"] for u in db]) + 1
+    new_tk = ""
+    if new_id == 0:
+        new_tk = "iduserfittizio"
+
+    new_tk = f"iduserfittizio_{new_id}"
+
+    new_user = {
+        "name": user.name,
+        "lastName": user.lastName,
+        "address": user.address,
+        "prePhone": user.prePhone,
+        "phone": user.phone,
+        "email": user.email,
+        "pw": user.pw,
+        "tk": new_tk,
+    }
+
     # Crea il nuovo record come da DB
-    new_record = ResponseUserAPI[User](
-        id=new_id,
-        data_user=user
-    )
-    
+    new_record = ResponseUserAPI[ResUser](id=new_id, data_user=new_user)
+
     # Aggiorna il DB
     db.append(new_record.dict())
-    write_db(db)        
+    write_db(db)
 
     # Risposta finale
-    response.status_code=status.HTTP_200_OK
-    return ResponseAPI[ResponseUserAPI[User]](
+    response.status_code = status.HTTP_200_OK
+    return ResponseAPI[ResponseUserAPI[ResUser]](
         success=True,
         message="Utente salvato correttamente",
         data=new_record,
-        status=200
+        status=200,
     )
+
+
+@routes.post(
+    "/login-user",
+    response_model=ResponseAPI[ResponseUserAPI[ResUser | None]],
+)
+def post_login_user(user: ReqUser, response: Response):
+
+    db = read_db()
+
+    # Cerca l'utente e confrontalo con quello da salvare onde evitare doppioni
+    for u_d in db:
+        if u_d["data_user"] is None:
+            continue
+
+        if u_d["data_user"]["email"] == user.email:
+            response.status_code = status.HTTP_200_OK
+            return ResponseAPI[ResponseUserAPI[ResUser]](
+                success=True,
+                message="Utente loggato correttamente",
+                data=ResponseUserAPI[ResUser](
+                    id=u_d["id"],
+                    data_user={
+                        **u_d["data_user"],
+                        "tk": u_d["data_user"]["tk"]
+                    },
+                ),
+                status=200,
+            )
+            
+    response.status_code = status.HTTP_404_NOT_FOUND
+    return ResponseAPI[ResponseUserAPI[None]](
+        success=False,
+        message="Utente non trovato",
+        data=ResponseUserAPI[None](
+            id=-1,
+            data_user=None,
+        ),
+        status=404,
+    )
+
 
 @routes.put(
     "/change-user",
-    response_model=ResponseAPI[ResponseUserAPI[User | None]],
+    response_model=ResponseAPI[ResponseUserAPI[ResUser | None]],
     responses={
         409: {
             "description": "Email già registrata",
@@ -133,15 +179,15 @@ def post_user(user: User, response: Response):
                         "success": False,
                         "message": "Email già registrata",
                         "data": None,
-                        "status": 409
-                    }
+                        "status": 409,
+                    },
                 }
-            }
+            },
         }
-    }
+    },
 )
 def put_user(
-    user: User,
+    user: ReqUser,
     response: Response,
 ):
     db = read_db()
@@ -161,21 +207,18 @@ def put_user(
 
     if not target_record:
         return ResponseAPI[ResponseUserAPI[None]](
-            success=False,
-            message="Utente non trovato",
-            data=None,
-            status=404
+            success=False, message="Utente non trovato", data=None, status=404
         )
 
     # 2. Aggiorna i campi modificati
-    updated_user = User(
+    updated_user = ReqUser(
         name=user.name or target_record["data_user"]["name"],
         lastName=user.lastName or target_record["data_user"]["lastName"],
         address=user.address or target_record["data_user"]["address"],
         prePhone=user.prePhone or target_record["data_user"]["prePhone"],
         phone=user.phone or target_record["data_user"]["phone"],
         email=user.email,  # email è la chiave di ricerca
-        pw=user.pw or target_record["data_user"]["pw"]
+        pw=user.pw or target_record["data_user"]["pw"],
     )
 
     # 3. Aggiorna il record nel DB
@@ -184,19 +227,16 @@ def put_user(
     write_db(db)
 
     # 4. Risposta finale
-    return ResponseAPI[ResponseUserAPI[User]](
+    return ResponseAPI[ResponseUserAPI[ResUser]](
         success=True,
         message="Utente aggiornato correttamente",
-        data=ResponseUserAPI[User](
-            id=target_record["id"],
-            data_user=updated_user
-        ),
-        status=200
+        data=ResponseUserAPI[ResUser](id=target_record["id"], data_user=updated_user),
+        status=200,
     )
-    
+
+
 @routes.delete(
-    "/delete-user",
-    response_model=ResponseAPI[ResponseUserAPI[User | None]]
+    "/delete-user", response_model=ResponseAPI[ResponseUserAPI[ResUser | None]]
 )
 def delete_user(email: str, response: Response):
     db = read_db()
@@ -217,11 +257,8 @@ def delete_user(email: str, response: Response):
         return ResponseAPI[ResponseUserAPI[None]](
             success=False,
             message="Utente non trovato",
-            data=ResponseUserAPI[None](
-                id=target_record["id"],
-                data_user=None
-            ),
-            status=404
+            data=ResponseUserAPI[None](id=target_record["id"], data_user=None),
+            status=404,
         )
 
     # SOFT DELETE
@@ -233,9 +270,6 @@ def delete_user(email: str, response: Response):
     return ResponseAPI[ResponseUserAPI[None]](
         success=True,
         message="Utente marcato come eliminato",
-        data=ResponseUserAPI[None](
-            id=target_record["id"],
-            data_user=None
-        ),
-        status=200
+        data=ResponseUserAPI[None](id=target_record["id"], data_user=None),
+        status=200,
     )
