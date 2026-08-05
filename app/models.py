@@ -1,7 +1,9 @@
 # qui inserire le classi per inferire le Response API
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 from pydantic.generics import GenericModel
 from typing import Optional, TypeVar, Generic 
+from datetime import datetime
+from decimal import Decimal
 
 class Address(BaseModel):
     country: str
@@ -15,6 +17,10 @@ class ReqUser(BaseModel):
     address: Address
     prePhone: str
     phone: str
+    email: str
+    pw: str
+
+class LoginUser(BaseModel):
     email: str
     pw: str
 
@@ -40,3 +46,17 @@ class ResponseAPI(GenericModel, Generic[T]):
     message: str
     data: T
     status: int
+    
+class InvoiceSchema(BaseModel):
+    id: int
+    created_at: datetime
+    num_invoice: Decimal
+    taxable: str
+    vat: str
+    total: str
+    creation_date: datetime
+    protocol_numb: int
+    invoice_token: str
+    tax_id_code: str
+    
+    model_config = ConfigDict(from_attributes=True)

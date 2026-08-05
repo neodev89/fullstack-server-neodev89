@@ -1,8 +1,13 @@
 # il file contenente le routes API
 from fastapi import APIRouter, Body, Response, status, HTTPException
-from app.models import ResponseAPI, ResponseUserAPI, ReqUser, ResUser
+from app.models import ResponseAPI, ResponseUserAPI, ReqUser, LoginUser, ResUser, InvoiceSchema
 from app.storage import read_db, write_db
 from app.invoices import Invoice
+from app.db import async_session
+from sqlalchemy import select
+from app.queue import login_queue
+from app.workers.login_worker import process_login_event
+from urllib.parse import unquote
 
 routes = APIRouter()
 
@@ -29,29 +34,59 @@ routes = APIRouter()
 def get_user(email: str):
     db = read_db()
 
+    # 1. Decodifica %40 in '@', rimuovi spazi bianchi e converti in minuscolo
+    cleaned_email = unquote(email).strip().lower()
+    
     # Cerca l'utente tramite l'id
     for u in db:
         if u["data_user"] is None:
             continue
 
-        if u["data_user"]["email"] == email:
-            return ResponseAPI[ResponseUserAPI[ResUser | None]](
+        # Normalizza anche l'email letta dal DB per un confronto sicuro
+        db_email = u["data_user"].get("email", "").strip().lower()
+
+        if db_email == cleaned_email:
+            return ResponseAPI[ResponseUserAPI[ResUser]](
                 success=True,
                 message="L'utente è stato trovato",
-                data=ResponseUserAPI[ResUser | None](
-                    id=u["id"], data_user=u["data_user"]
+                data=ResponseUserAPI[ResUser](
+                    id=u["id"], 
+                    data_user=u["data_user"]
                 ),
                 status=200,
             )
 
     # Nessun utente trovato
-    return ResponseAPI[ResponseUserAPI[ResUser | None]](
-        success=True,
-        message="Valori ritornati",
+    return ResponseAPI[ResponseUserAPI[None]](
+        success=False,
+        message=f"Valori non ritornati perché {email} ha un valore non corretto",
         data=ResponseUserAPI[None](id=u["id"], data_user=None),
         status=404,
     )
 
+@routes.get(
+    "/get-invoice-user/{token}",
+    response_model=ResponseAPI[list[InvoiceSchema]]
+)
+async def get_invoice_user(token: str):
+    async with async_session() as session:
+        stmt = select(Invoice).where((Invoice.invoice_token == token))
+        result = await session.execute(stmt)
+        invoice = result.scalars().all()
+        
+        if (invoice):
+            return ResponseAPI[list[InvoiceSchema]](
+                success= True,
+                message= "Dati ottenuti",
+                data= invoice,
+                status= 200
+            )
+        return ResponseAPI[None](
+            success= False,
+            message= f"I dati non sono stati recuperati perché {token} è errato o il database non ha dati",
+            data= None,
+            status= 404
+        )    
 
 @routes.post(
     "/save-user",
@@ -130,7 +165,7 @@ def post_user(user: ReqUser, response: Response):
     "/login-user",
     response_model=ResponseAPI[ResponseUserAPI[ResUser | None]],
 )
-def post_login_user(user: ReqUser, response: Response):
+def post_login_user(user: LoginUser, response: Response):
 
     db = read_db()
 
@@ -141,6 +176,8 @@ def post_login_user(user: ReqUser, response: Response):
 
         if u_d["data_user"]["email"] == user.email:
             response.status_code = status.HTTP_200_OK
+            # 🔥 QUEUE: push del job
+            login_queue.enqueue(process_login_event, user.email)
             return ResponseAPI[ResponseUserAPI[ResUser]](
                 success=True,
                 message="Utente loggato correttamente",
