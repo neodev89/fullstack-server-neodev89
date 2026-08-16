@@ -60,3 +60,34 @@ class InvoiceSchema(BaseModel):
     tax_id_code: str
     
     model_config = ConfigDict(from_attributes=True)
+    
+    
+class PartialUser(BaseModel):
+    name: str
+    lastName: str
+    email: str
+
+class PartialInvoice(BaseModel):
+    id: int
+    created_at: datetime
+    num_invoice: Decimal
+    taxable: str
+    vat: str
+    total: str
+    creation_date: datetime
+    protocol_numb: int
+    tax_id_code: str
+
+class PartialInvoiceSchema(BaseModel):
+    id: int
+    created_at: datetime
+    num_invoice: Decimal
+    taxable: str
+    vat: str
+    total: str
+    creation_date: datetime
+    protocol_numb: int
+    tax_id_code: str
+    name: str
+    lastName: str
+    email: str

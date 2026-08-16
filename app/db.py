@@ -1,7 +1,7 @@
-sessionDb = "postgresql+psycopg://postgres:n5R13zRsiZiGs7T3@db.nievkcazlxioutxagdpc.supabase.co:5432/postgres"
-sessionDb1 = "postgresql+psycopg://postgres.nievkcazlxioutxagdpc:n5R13zRsiZiGs7T3@aws-1-eu-west-2.pooler.supabase.com:6543/postgres"
+# sessionDb = "postgresql+psycopg://postgres:n5R13zRsiZiGs7T3@db.nievkcazlxioutxagdpc.supabase.co:5432/postgres"
+# sessionDb1 = "postgresql+psycopg://postgres.nievkcazlxioutxagdpc:n5R13zRsiZiGs7T3@aws-1-eu-west-2.pooler.supabase.com:6543/postgres"
 sessionDb2 = "postgresql+psycopg://postgres.nievkcazlxioutxagdpc:n5R13zRsiZiGs7T3@aws-1-eu-west-2.pooler.supabase.com:5432/postgres"
-directUrl = "postgresql+psycopg://postgres:[n5R13zRsiZiGs7T3]@db.nievkcazlxioutxagdpc.supabase.co:5432/postgres"
+# directUrl = "postgresql+psycopg://postgres:[n5R13zRsiZiGs7T3]@db.nievkcazlxioutxagdpc.supabase.co:5432/postgres"
 
 # db.py
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine, async_sessionmaker
